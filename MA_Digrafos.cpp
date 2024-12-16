@@ -3,13 +3,26 @@
 #include <climits>
 using namespace std;
 
+void imprimeM(int ** M, int n) {
+   for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            cout << M[i][j] <<" ";
+        }
+        cout << "\n";
+    }
+    cout <<"\n";
+}
+
 class Grafo_MA 
 {
     private:
+        
         int n;
         int m;
         int  **M;
+
     public:
+        
         void lerGrafo(){
             int u;
             int v;
@@ -57,7 +70,8 @@ class Grafo_MA
                 printf("\n");
             }
         }
-        int* Dijkstra(int v ){
+
+        int* Dijkstra(int v){
             v=v-1;
             int * distancia = (int*)malloc((n+1)*sizeof(int));
             bool * marcado = (bool*)malloc((n+1)*sizeof(bool));
@@ -137,14 +151,136 @@ class Grafo_MA
                 if (caminho[i]!=0){
                 cout << caminho[i] << " ";
                 }
-                cout << "\n";
             }
             cout << "\n";
+        }
+        
+        int ** floyd(){
+            int ** distancia;
+            distancia = (int**)malloc(n*sizeof(int*));
+            for (int i=0;i<n;i++){
+                distancia[i]= (int*)malloc(n*sizeof(int));
+            }
+
+            for(int i=0;i<n;i++){
+                for (int j=0;j<n;j++){
+                    if (M[i][j]==0 && i!=j){
+                    distancia[i][j]=300000;
+                    }
+                   else {
+                    distancia[i][j]=M[i][j];
+                   }
+                }
+            }
+
+            for (int k=0;k<n;k++){
+                for (int i=0;i<n;i++){
+                    if (distancia[i][k] != 300000){
+                        for (int j=0;j<n;j++){
+                            distancia[i][j]= min(distancia[i][j],distancia[i][k] + distancia[k][j]);
+                        }
+                    }
+                }
+                cout << "k: "<<k <<"\n";
+                //imprimeM(distancia,n);
+            }
+
+            return distancia;
+        }
+
+        int ** floyd(int ** vcm){
+            int ** distancia;
+            
+            distancia = (int**)malloc(n*sizeof(int*));
+            
+            for (int i=0;i<n;i++){
+                distancia[i]= (int*)malloc(n*sizeof(int));
+            }
+
+            for(int i=0;i<n;i++){
+                for (int j=0;j<n;j++){
+                    if (M[i][j]==0 && i!=j){
+                    distancia[i][j]=300000;
+                    }
+                   else {
+                    distancia[i][j]=M[i][j];
+                   }
+                   vcm[i][j]=i;
+                }
+            }
+
+            for (int k=0;k<n;k++){
+                for (int i=0;i<n;i++){
+                    if (distancia[i][k] != 300000){
+                        for (int j=0;j<n;j++){
+                            distancia[i][j]= min(distancia[i][j],distancia[i][k] + distancia[k][j]);
+                            vcm[i][j]=vcm[k][j];
+                        }
+                    }
+                }
+                cout << "k: "<<k <<"\n";
+                //imprimeM(distancia,n);
+            }
+
+            return distancia;
+        }
+
+/*     int * caminhoMinimoFloyd(int u, int v){
+            int ** vcm;
+            int * caminho = (int*)malloc(n*sizeof(int)); 
+            vcm = (int**)malloc(n*sizeof(int*));          
+            for (int i=0;i<n;i++){
+                vcm[i]= (int*)malloc(n*sizeof(int));
+            }
+            int ** distancia = floyd(vcm);
+
+            if (M[u][v]==0 || M[u][v] > distancia[u][v]){
+                int k = vcm[u][v];
+                cmf(u,k);
+
+            }
+        }*/
+
+        int * bellmanFord(int v){
+            int * distancia = (int*)malloc(n*sizeof(int));
+            for (int i=0;i<n;i++){
+                distancia[i]= 300000;
+            }
+            distancia[v]=0;
+            for (int k=0;k<n-1;k++){
+                for (int i=0;i<n;i++){
+                    for (int j=0;j<n-1;j++){
+                        if (M[i][j]!=0 && distancia[i]> (distancia[i]+M[i][j])){
+                            distancia[j] = distancia[i] + M[i][j];
+                        }
+                    }
+                }    
+            }
+        }
+
+        int * bellmanFord(int v, int * vcm){
+            int * distancia = (int*)malloc(n*sizeof(int));
+            for (int i=0;i<n;i++){
+                distancia[i]= 300000;
+            }
+            distancia[v]=0;
+            for (int k=0;k<n-1;k++){
+                for (int i=0;i<n;i++){
+                    for (int j=0;j<n-1;j++){
+                        if (M[i][j]!=0 && distancia[i]> (distancia[i]+M[i][j])){
+                            distancia[j] = distancia[i] + M[i][j];
+                            vcm[j]=i;
+                        }
+                    }
+                }    
+            }
+            return distancia;
         }
 };
 
 int main(void){
     Grafo_MA G;
     G.lerGrafo();
-    G.caminhoMinimo(2,3);
+    G.bellmanFord(2);
+    
 }
