@@ -13,6 +13,13 @@ void imprimeM(int ** M, int n) {
     cout <<"\n";
 }
 
+void imprimeV(int * M, int n) {
+   for (int i = 0; i < n; i++) {
+        cout << M[i]<<" ";
+    }
+    cout <<"\n";
+}
+
 class Grafo_MA 
 {
     private:
@@ -27,6 +34,10 @@ class Grafo_MA
             int u;
             int v;
             int peso;
+            bool digrafo = false;
+
+            cout << "Digrafo (1/0): ";
+            cin >> digrafo; 
             cout << "Numero de Vertices: ";
             cin >> n;
             cout << "Numero de Arestas: ";
@@ -37,7 +48,7 @@ class Grafo_MA
             for (int i=0;i<n;i++){
                 M[i] = (int*) malloc (n*sizeof(int));
             }
-
+            
             for (int i=0;i<n;i++){
                 for (int j=0;j<n;j++){
                     M[i][j]=0;
@@ -50,7 +61,9 @@ class Grafo_MA
                 cin >>v;
                 cin >> peso;
                 M[u-1][v-1]=peso;
+                if (!digrafo){
                 M[v-1][u-1]=peso;
+                }
             }
         }
 
@@ -243,19 +256,21 @@ class Grafo_MA
 
         int * bellmanFord(int v){
             int * distancia = (int*)malloc(n*sizeof(int));
+            v=v-1;
             for (int i=0;i<n;i++){
                 distancia[i]= 300000;
             }
             distancia[v]=0;
             for (int k=0;k<n-1;k++){
                 for (int i=0;i<n;i++){
-                    for (int j=0;j<n-1;j++){
-                        if (M[i][j]!=0 && distancia[i]> (distancia[i]+M[i][j])){
+                    for (int j=0;j<n;j++){
+                        if (M[i][j]!=0 && (distancia[j] > (distancia[i]+M[i][j]))){
                             distancia[j] = distancia[i] + M[i][j];
                         }
                     }
                 }    
             }
+            return distancia;
         }
 
         int * bellmanFord(int v, int * vcm){
@@ -266,8 +281,8 @@ class Grafo_MA
             distancia[v]=0;
             for (int k=0;k<n-1;k++){
                 for (int i=0;i<n;i++){
-                    for (int j=0;j<n-1;j++){
-                        if (M[i][j]!=0 && distancia[i]> (distancia[i]+M[i][j])){
+                    for (int j=0;j<n;j++){
+                        if (M[i][j]!=0 && (distancia[j] > (distancia[i]+M[i][j]))){
                             distancia[j] = distancia[i] + M[i][j];
                             vcm[j]=i;
                         }
@@ -276,11 +291,42 @@ class Grafo_MA
             }
             return distancia;
         }
+
+        bool negCiclo(int v){
+            int * distancia = (int*)malloc(n*sizeof(int));
+            v=v-1;
+            for (int i=0;i<n;i++){
+                distancia[i]= 300000;
+            }
+            distancia[v]=0;
+            for (int k=0;k<n-1;k++){
+                for (int i=0;i<n;i++){
+                    for (int j=0;j<n;j++){
+                        if (M[i][j]!=0 && (distancia[j] > (distancia[i]+M[i][j]))){
+                            distancia[j] = distancia[i] + M[i][j];
+                        }
+                    }
+                }    
+            }
+            for (int i=0;i<n;i++){
+                for (int j=0;j<n;j++){
+                    if (M[i][j]!=0 && (distancia[j] > (distancia[i]+M[i][j]))){
+                        return true;
+                    }
+                }
+            }
+            return false;    
+        }
 };
 
 int main(void){
     Grafo_MA G;
     G.lerGrafo();
-    G.bellmanFord(2);
+    imprimeV(G.bellmanFord(1),G.getn());
+    if (G.negCiclo(1)){
+        cout << "Tem ciclo neg\n";
+    } else {
+        cout << "Nao tem ciclo neg\n";
+    }
     
 }
